@@ -121,9 +121,16 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## CLI Output
 
-Running `python -m src.main` with the default `pop / happy / energy=0.8` profile:
+Running `python -m src.main` now iterates through four user profiles —
+High-Energy Pop, Chill Lofi, Deep Intense Rock, and an adversarial
+"Conflicted Listener" (pop + sad + high energy + acoustic). Screenshot of the
+full terminal output:
 
-![Recommender CLI output](images/cli-output.png)
+![Recommender CLI output for all four profiles](images/phase4-four-profiles-output.png)
+
+See [reflection.md](reflection.md) for profile-pair comparisons and the
+weight-shift experiment, and [model_card.md](model_card.md) §6–§7 for the
+limitations and evaluation write-up.
 
 ---
 
