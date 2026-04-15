@@ -9,3 +9,13 @@ id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
 8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
 9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
 10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
+11,Basement Riot,Crashline,punk,intense,0.95,168,0.42,0.55,0.06
+12,Velvet Hours,Mira Solace,jazz,moody,0.33,86,0.38,0.49,0.81
+13,Paper Planes Dance,Kite Kids,indie pop,happy,0.71,120,0.83,0.80,0.28
+14,Deep Blue Drift,Orbit Bloom,ambient,relaxed,0.22,58,0.55,0.35,0.94
+15,Trap House Sunrise,K-Raze,hip hop,intense,0.88,140,0.52,0.91,0.08
+16,Lowkey Confessions,Slow Stereo,r&b,moody,0.45,92,0.41,0.68,0.55
+17,Festival Pulse,Max Pulse,edm,happy,0.94,128,0.78,0.93,0.04
+18,Study Fog,LoRoom,lofi,focused,0.38,76,0.52,0.57,0.82
+19,Canyon Folk,Pine & Willow,folk,relaxed,0.30,98,0.67,0.44,0.88
+20,Afterhours Groove,Neon Echo,synthwave,chill,0.58,104,0.60,0.74,0.30

@@ -17,17 +17,70 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world platforms like Spotify and YouTube predict what you'll love next by blending two main approaches. **Collaborative filtering** looks at other users' behavior. If people with listening history similar to yours loved a song, it recommends that song to you, even without knowing anything about the audio itself. **Content-based filtering** instead looks at the attributes of the songs themselves (genre, tempo, mood, acousticness) and recommends songs whose features match your taste profile. Most production systems combine both, plus signals like likes, skips, playlist adds, and completion rate, and feed them into large machine learning models trained on billions of interactions.
 
-Some prompts to answer:
+My simulation is a small **content-based recommender**. It has no other users to learn from, so it scores each song by how closely its attributes match a single user's stated preferences. The system prioritizes **vibe matching**, rewarding songs whose energy and valence are *close* to the user's target (not just high or low), and giving bonus points for matching the preferred genre and mood.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+### Features Used
 
-You can include a simple diagram or bullet list if helpful.
+**`Song` attributes** (from `data/songs.csv`):
+- `genre` (categorical) — e.g. pop, lofi, rock, jazz
+- `mood` (categorical) — e.g. happy, chill, intense, focused
+- `energy` (0.0–1.0) — how energetic the track feels
+- `valence` (0.0–1.0) — how positive / happy it sounds
+- `tempo_bpm` — beats per minute
+- `danceability`, `acousticness` — secondary vibe signals
+
+**`UserProfile` stores**:
+- `preferred_genre` and `preferred_mood` (categorical targets)
+- `target_energy` and `target_valence` (numeric targets on 0.0–1.0)
+
+### Scoring vs. Ranking
+
+The **Scoring Rule** rates one song against the user: categorical matches (genre, mood) add fixed weighted points, and numerical features contribute `1 - |song.value - user.target|` so songs *closer* to the target score higher. The **Ranking Rule** then sorts every song in the catalog by that score and returns the top N (scoring judges individual fit, ranking turns that into an ordered recommendation list).
+
+### Example User Profile — "VibeFinder Default"
+
+```python
+UserProfile(
+    favorite_genre="lofi",
+    favorite_mood="chill",
+    target_energy=0.40,
+    likes_acoustic=True,
+)
+```
+
+This profile describes a listener who wants low-energy, acoustic, chill lofi — the opposite end of the catalog from "intense rock." Pinning both a categorical tag (`lofi` / `chill`) *and* a numeric target (`energy ≈ 0.4`) pulls Midnight Coding and Library Rain to the top while pushing Storm Runner and Gym Hero to the bottom. A profile with only `favorite_genre` would be too narrow; `target_energy` lets the system differentiate "chill lofi" from "hyperpop-lofi" within one genre.
+
+### Algorithm Recipe (Finalized Weights)
+
+| Signal | Weight | Formula |
+| --- | --- | --- |
+| Genre match | **+2.0** | `song.genre == user.favorite_genre` |
+| Mood match | **+1.0** | `song.mood == user.favorite_mood` |
+| Energy similarity | **+1.0 × sim** | `1 - abs(song.energy - user.target_energy)` |
+| Acoustic bonus | **+0.5** | if `user.likes_acoustic` and `song.acousticness > 0.7` |
+
+Ties break by song id. Top-K (default K=5) are returned.
+
+### Data Flow
+
+```mermaid
+flowchart LR
+    A[User Preferences<br/>UserProfile] --> C
+    B[(songs.csv)] --> L[load_songs]
+    L --> C{score_song<br/>per song}
+    C --> S[Score + Explanation]
+    S --> R[Sort desc]
+    R --> K[Top-K]
+```
+
+### Expected Biases
+
+- **Genre dominance.** At +2.0, a genre match almost always beats a better mood+energy fit from a different genre — a perfect-vibe jazz song loses to a mediocre lofi one for a lofi user.
+- **Popular-category bias.** Genres overrepresented in `songs.csv` (lofi, pop) match more users by chance; rare genres (folk, r&b, punk) are structurally disadvantaged.
+- **Midpoint bias.** Songs with `energy ≈ 0.5` score decently against any target, so "average" tracks surface more than they should.
+- **No diversity penalty.** Top-K can be near-duplicates (three LoRoom tracks) — the ranker never penalizes similarity *between* recommendations.
 
 ---
 
@@ -63,6 +116,14 @@ pytest
 ```
 
 You can add more tests in `tests/test_recommender.py`.
+
+---
+
+## CLI Output
+
+Running `python -m src.main` with the default `pop / happy / energy=0.8` profile:
+
+![Recommender CLI output](images/cli-output.png)
 
 ---
 
